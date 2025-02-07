@@ -41,6 +41,9 @@ jobs:
       run: |
         sudo apt-get install -y php7.2-cli php7.2-mbstring php7.2-xml php7.2-curl
 
+    - name: Wait for MySQL to start
+      run: sleep 30
+
     - name: Set up MySQL
       run: |
         sudo service mysql start
@@ -56,3 +59,7 @@ jobs:
     - name: Check Apache status
       run: |
         curl http://localhost
+
+    - name: Check MySQL status
+      run: |
+        sudo journalctl -xeu mysql.service
