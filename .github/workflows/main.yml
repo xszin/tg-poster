@@ -1,0 +1,58 @@
+name: PHP 7.2 Apache2 with MySQL
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testdb
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Apache2
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y apache2
+        sudo apt-get install -y libapache2-mod-php7.2
+        sudo apt-get install -y php7.2-mysql
+
+    - name: Start Apache2
+      run: sudo service apache2 start
+
+    - name: Install PHP dependencies
+      run: |
+        sudo apt-get install -y php7.2-cli php7.2-mbstring php7.2-xml php7.2-curl
+
+    - name: Set up MySQL
+      run: |
+        sudo service mysql start
+        mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS testdb;"
+        mysql -u root -proot testdb < your-database-dump.sql
+
+    - name: Run PHP unit tests
+      run: |
+        # Установите PHPUnit или другие тестовые фреймворки, если необходимо
+        curl -sS https://getcomposer.org/installer | php
+        php composer.phar install
+        ./vendor/bin/phpunit --configuration phpunit.xml
+
+    - name: Check Apache status
+      run: |
+        curl http://localhost
