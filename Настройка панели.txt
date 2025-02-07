@@ -1,0 +1,42 @@
+Установка панели:
+
+1. Поместить каталог /parser_channel/ в корень(под тем же названием), или залить и расраковать в /var/www/html/.
+2. Указать данные в db.php и создать бд.
+3. Подключение аккаунта - Зайти в SSH клиент:
+	1. Если находится в /var/www/html/parser_channel/ - перейти: cd /var/www/html/parser_channel/
+	2. Ввести команду php auth.php
+	3. Указать номер аккаунта тг, после в tdesktop прийдет код, ввести его.
+	4. После подк в консоли будет название профиля(напр 490XXXXXXX.tg, или +79XXXXXXX) указать это в панели поле "профиль".(версии v3.7 не требуется).
+
+4. Указать права записи(на все каталоги в путях) 0777 на:
+ 1. /www/html/parser_channel/
+ 2. Файлы профиля(версии v3.7 не требуется) telegram(name_profile - назв профиля, созданое через php auth.php):
+		/var/www/html/parser_channel/name_profile.tg
+		/var/www/html/parser_channel/name_profile.tg.lock
+
+5. Настройка CRON(1 или 2)
+	4.1. CRON FOR SSH(из консоли):
+	ввести: crontab -e
+       и указать:
+	*/1 * * * * curl -S "http://IP/parser_channel/multiple_task.php"
+      И после обязательно нажать - ctrl+o и потом ctrl+x (сохранить и выйти).
+			
+5.2. USER CRON(добавление задачи из панели):
+			curl -S "http://IP/parser_channel/multiple_task.php"
+		
+		В случае ошибки запуска через CRON, выполнить через ssh(даст права на запуск):	
+			1. adduser www-data sudo
+			2. sudo visudo
+    			указать самом низу строку: www-data ALL=(ALL:ALL) NOPASSWD: ALL
+	  3.	chown -R www-data /var/www/html/parser_channel/
+
+		
+6. Вход в панель:
+		http://IP/parser_channel/ admin:z6GZ1J66sAve
+		6. Для постинга добавить подкл аккаунт в канал(админом) и так же bot token(режим https для бота).
+
+Лимит добавления каналов ~5шт за раз, после может сработать лимит на вступления, подождать 10-15мн, и можно снова добавлять.
+Подкл аккаунт должен быть админом на каналах в которых будет постить.
+
+Для вкл функции "Кнопки голосования(для фото)" нужно подвизать домен(с ssl) и 
+зайти в панель вида - https://mydomain.ru/parser_channel/ .

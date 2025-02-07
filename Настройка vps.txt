@@ -1,0 +1,64 @@
+ = НАСТРОЙКА VPS =
+
+Требования:
+Apache2(.htaccess), php7.2, MySql.
+vps должен быть пустым(с коробки).
+ 
+Использовался хостинг vps:
+https://firstbyte.ru/?from=8330
+
+Используемый VPS на хостинге:
+Название: EU-KVM-SSD-Telegram.
+Виртуализация: KVM, Процессор: 1 ядро, Память: 512 Mb, Диск: 5 GB SSD. - 111.00 RUB
+OS: Debain-9-x86_64 \ Ubuntu-14.04-amd64
+- - - -
+
+Пример необходимых данных для настройки:
+Настройка БД:
+Имя базы: AutoPoster
+Пароль пользователя: PASSWORD_USER
+Каталог куда была залита панель: /var/www/html
+
+Список ssh команд для настройки vps(указывать по отдельности):
+
+apt update
+apt install curl nano zip unzip htop sudo -y
+apt install ca-certificates apt-transport-https -y
+wget -q https://packages.sury.org/php/apt.gpg -O- | sudo apt-key add -
+echo "deb https://packages.sury.org/php/ stretch main" | tee /etc/apt/sources.list.d/php.list
+apt update
+apt install php7.2 -y
+apt install php7.2-cli php7.2-common php7.2-curl php7.2-json php7.2-mbstring php7.2-mysql php7.2-xml -y php7.2-zip
+a2enmod rewrite
+systemctl restart apache2
+apt install mysql-server -y
+mysql -u root
+
+UPDATE mysql.user SET authentication_string=PASSWORD('PASSWORD_USER'), plugin='mysql_native_password' WHERE User='root';
+CREATE DATABASE AutoPoster;
+flush privileges;
+quit;
+
+cd /var/www/html
+mysql -u root -p AutoPoster < dump.sql
+
+
+В конфиг/etc/apache2/apache2.conf изменить значение:
+"AllowOverride None" на "AllowOverride All". 
+
+Пример - было:
+
+<Directory /var/www/html>
+	Options Indexes FollowSymLinks
+	AllowOverride None
+	Require all granted
+</Directory>
+
+Стало:
+<Directory /var/www/html>
+	Options Indexes FollowSymLinks
+	AllowOverride All
+	Require all granted
+</Directory>
+
+systemctl restart apache2
